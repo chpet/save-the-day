@@ -1,0 +1,42 @@
+body {
+	background:#303030;
+}
+
+#canvasBg {
+	margin:100px auto 0px;
+	background-color:black;
+	display:block;
+}
+
+
+#canvasShooter {
+	margin:-500px auto 0px;
+	display:block;
+}
+#canvasHud {
+	margin:-500px auto 0px;
+	display:block;
+}
+#warningHud {
+	margin:-500px auto 0px;
+	display:block;
+}
+#canvasBoss {
+	margin:-500px auto 0px;
+	display:block;
+}
+#canvasRadiation {
+	margin:-500px auto 0px;
+	display:block;
+}
+#canvasBullets {
+	margin:-500px auto 0px;
+	display:block;
+}
+
+#story {
+	margin-top:10px;
+	font-family:Arial;
+	color:white;
+	text-align:center;
+}
