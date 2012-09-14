@@ -9,6 +9,9 @@ var ctxShooter = canvasShooter.getContext('2d');
 var canvasHud = document.getElementById('canvasHud');
 var ctxHud = canvasHud.getContext('2d');
 
+var canvasMultiplier = document.getElementById('canvasMultiplier');
+var ctxMultiplier = canvasMultiplier.getContext('2d');
+
 var canvasWarningHud = document.getElementById('warningHud');
 var ctxWarningHud = canvasWarningHud.getContext('2d');
 
@@ -25,6 +28,7 @@ var ctxRadiation = canvasRadiation.getContext('2d');
 var gameWidth = canvasBg.width;
 var gameHeight = canvasBg.height;
 var warningHudText = '';
+var multiplier = 'x1';
 var bullets = [];
 var totalBullets = 0;
 var spawnedBullets = 0;
@@ -40,6 +44,7 @@ var phaseOneActionTimeout;
 
 //objects
 var hud1 = new Hud();
+var multiplier1 = new Multiplier();
 var warninghud1 = new WarningHud();
 var shooter1 = new Shooter();
 var boss1 = new Boss();
@@ -144,6 +149,7 @@ function stopSpawningBullets() {
 function loop() {
 	if (isPlaying) {
 		hud1.draw();
+		multiplier1.draw();
 		warninghud1.draw();
 		shooter1.draw();
 		boss1.draw();
@@ -249,9 +255,9 @@ function checkScore(){
 	if (scoreCheck){
 
 		if ((shooter1.drawX>=gameWidth/2-(0.5)*boss1.width) && (shooter1.drawX<=gameWidth/2+(0.5)*boss1.width)){
-			if (shooter1.drawY<=gameHeight/4) score = score + 15; 
-			else if (shooter1.drawY<=gameHeight/2) score = score +5;
-			else score ++;
+			if (shooter1.drawY<=gameHeight/4) { score = score + 15; multiplier='x15' } 
+			else if (shooter1.drawY<=gameHeight/2) { score = score + 5;  multiplier='x2' }
+			else { score ++; multiplier='x1'};
 		}
 	}
 }
@@ -281,6 +287,19 @@ WarningHud.prototype.draw = function() {
 }
 function clearCtxWarningHud() {
 	ctxWarningHud.clearRect(0,0,gameWidth,gameHeight);
+}
+
+//multiplier
+function Multiplier() {}
+
+Multiplier.prototype.draw = function() {
+	clearCtxMultiplier();
+	ctxMultiplier.fillText(multiplier, 13, 40);
+	ctxMultiplier.fillStyle = 'red';
+	ctxMultiplier.font = 'bold 12px Arial';
+}
+function clearCtxMultiplier() {
+	ctxMultiplier.clearRect(0,0,gameWidth,gameHeight);
 }
 
 //shooter
@@ -421,10 +440,10 @@ if (this.drawX <= shooter1.drawX + this.bulletRadius + 2 &&
 }
 
 //game over function
-
 function gameOver() {
 	if(!gameIsOver){
 	gameIsOver=true;
+	multiplier='x0';
 	stopSpawningBullets();
 	stopPhaseInterval();
 	stopPhaseOneHudTimeout();

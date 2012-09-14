@@ -7,8 +7,6 @@ body {
 	background-color:black;
 	display:block;
 }
-
-
 #canvasShooter {
 	margin:-500px auto 0px;
 	display:block;
@@ -18,6 +16,10 @@ body {
 	display:block;
 }
 #warningHud {
+	margin:-500px auto 0px;
+	display:block;
+}
+#canvasMultiplier {
 	margin:-500px auto 0px;
 	display:block;
 }
