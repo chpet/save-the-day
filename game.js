@@ -2,12 +2,16 @@ window.addEventListener('load',init,false);
 
 var canvasBg = document.getElementById('canvasBg');
 var ctxBg = canvasBg.getContext('2d');
+
 var canvasShooter = document.getElementById('canvasShooter');
 var ctxShooter = canvasShooter.getContext('2d');
+
 var canvasHud = document.getElementById('canvasHud');
 var ctxHud = canvasHud.getContext('2d');
+
 var canvasWarningHud = document.getElementById('warningHud');
 var ctxWarningHud = canvasWarningHud.getContext('2d');
+
 var canvasBoss = document.getElementById('canvasBoss');
 var ctxBoss = canvasBoss.getContext('2d');
 
@@ -17,68 +21,57 @@ var ctxBullets = canvasBullets.getContext('2d');
 var canvasRadiation = document.getElementById('canvasRadiation');
 var ctxRadiation = canvasRadiation.getContext('2d');
 
-
-
-ctxHud.fillText("Sample String", 10, 50);
+//main variables
+var gameWidth = canvasBg.width;
+var gameHeight = canvasBg.height;
 var warningHudText = '';
 var bullets = [];
 var totalBullets = 0;
 var spawnedBullets = 0;
 var spawnRate = 35;
 var spawnAmount = 1;
-var spawnInterval;
 var score = 0;
+
+//setInterval && setTimeout
+var spawnInterval;
 var phaseInterval;
-	var hud1 = new Hud();
-	var warninghud1 = new WarningHud();
-	var shooter1 = new Shooter();
-	var boss1 = new Boss();
-	var radiation = new Radiation();
+var phaseOneHudTimeout;
+var phaseOneActionTimeout;
 
+//objects
+var hud1 = new Hud();
+var warninghud1 = new WarningHud();
+var shooter1 = new Shooter();
+var boss1 = new Boss();
+var radiation = new Radiation();
 
-var gameWidth = canvasBg.width;
-var gameHeight = canvasBg.height;
+//colors vars
+var phaseOneTriStartColor = '#ffcc11';
+var phaseOneTriEndColor = '#f12f12';
+var phaseTwoTriStartColor = '#f12f12';
+var phaseTwoTriEndColor = '#303030';
 
-
-var colorStops = new Array(
- {color:"#FF0000", stopPercent:0},
- {color:"#FFFF00", stopPercent:.125},
- {color:"#00FF00", stopPercent:.375},
- {color:"#0000FF", stopPercent:.625},
- {color:"#FF00FF", stopPercent:.875},
- {color:"#FF0000", stopPercent:1});
-
-var gradient = ctxShooter.createLinearGradient(gameWidth/2,0,gameWidth/2,gameHeight);
-function randomColors (){
-for (var i=0; i < colorStops.length; i++) {     
-   var tempColorStop = colorStops[i];     
-   var tempColor = tempColorStop.color;     
-   var tempStopPercent = tempColorStop.stopPercent;     
-   gradient.addColorStop(tempStopPercent,tempColor);    
-   tempStopPercent += .1;     
-   if (tempStopPercent > 1) {
-       tempStopPercent = 0;
-   }
-   tempColorStop.stopPercent = tempStopPercent;;
-   colorStops[i] = tempColorStop;
- }
-}
 var isPlaying = false;
+var gameIsOver = false;
 var scoreCheck = false;
-var requestAnimFrame =  window.requestAnimationFrame ||
-						window.webkitRequestAnimationFrame ||
-						window.mozRequestAnimationFrame ||
-						window.msRequestAnimationFrame ||
-						window.oRequestAnimationFrame;		
-	
-//init 
 
+var requestAnimFrame =  window.requestAnimationFrame ||
+window.webkitRequestAnimationFrame ||
+window.mozRequestAnimationFrame ||
+window.msRequestAnimationFrame ||
+window.oRequestAnimationFrame;		
+
+//init 
 function init() {
-	randomColors();
 	startLoop();
+	pulseInit();
 	startSpawningBullets();
-	document.addEventListener('keydown',checkKeyDown,false);
-	document.addEventListener('keyup',checkKeyUp,false);
+document.addEventListener('keydown',checkKeyDown,false);
+document.addEventListener('keyup',checkKeyUp,false);
+}
+
+function pulseInit(){
+	animateColor(ctxBoss.fillstyle, phaseOneTriStartColor, phaseOneTriEndColor);
 }
 
 function spawnBullets(n) {
@@ -90,25 +83,41 @@ function spawnBullets(n) {
 	}
 }
 
-
 function startPhaseInterval() {
 	phaseInterval = setInterval(function() {checkPhase()},10000);
 }
+
 function checkPhase () {
-	if (phase===1) {
-		setTimeout(function() {
+	if (phase===0){}
+	else if (phase===1) {
+		phaseOneHudTimeout=setTimeout(function() {
 			warningHudText = "TRIANGLE GOES IMBA!!!!"
-			setTimeout(function() {phase = 2; warningHudText = '' }, 4000);
+			phaseOneActionTimeout=setTimeout(function() {
+				phase = 2; 
+				warningHudText = ''; 
+				clearTimeout(animateTimer); 
+				colorIntervalPhaseTwo();}, 4000);
 		}, 3000)
 
 	} else if (phase === 2){
 		phase = 1;
+		clearTimeout(animateTimer); 
+		colorIntervalPhaseOne();
 	}
+}
+
+function stopPhaseOneHudTimeout(){
+	clearTimeout(phaseOneHudTimeout);
+}
+
+function stopPhaseOneActionTimeout(){
+	clearTimeout(phaseOneActionTimeout);
 }
 
 function stopPhaseInterval() {
 	clearInterval(phaseInterval);
 }
+
 function drawAllBullets() {
 	clearCtxBullets();
 	for (var i = 0; i < bullets.length; i++) {
@@ -117,7 +126,6 @@ function drawAllBullets() {
 }
 
 function startSpawningBullets() {
-
 	stopSpawningBullets();
 	stopPhaseInterval();
 	phase=1;
@@ -142,7 +150,6 @@ function loop() {
 		checkScore();
 		drawAllBullets();
 		radiation.draw();
-
 		requestAnimFrame(loop);
 	}
 }
@@ -156,25 +163,102 @@ function stopLoop() {
 	isPlaying = false;
 }
 
+//color pulse
+function colorIntervalPhaseOne() {
+	animateColor(ctxBoss.fillstyle, phaseOneTriStartColor, phaseOneTriEndColor);
+}
+function colorIntervalPhaseTwo() {
+	animateColor(ctxBoss.fillstyle, phaseTwoTriStartColor, phaseTwoTriEndColor);
+}
+
+function d2h(dec) { 
+	return dec.toString(16);
+}
+function h2d(hex) { 
+	return parseInt(hex,16);
+}
+function rgb2h(r,g,b) { 
+	return [d2h(r),d2h(g),d2h(b)];
+}
+function h2rgb(h,e,x) {
+	return [h2d(h),h2d(e),h2d(x)];
+}
+function cssColor2rgb(color) {
+	if(color.indexOf('rgb')<=-1) {
+		return h2rgb(color.substring(1,3),color.substring(3,5),color.substring(5,7));
+	}
+	return color.substring(4,color.length-1).split(',');
+}
+
+var newColor;
+var isNewColor=false;
+function animateColor(colorVar,begin,end, duration, fps) {
+	if(!duration) duration = 1000;
+	if(!fps) fps = 20;
+	duration=parseFloat(duration);
+	fps=parseFloat(fps);
+var interval    = Math.ceil(1000/fps);  //50
+var totalframes = Math.ceil(duration/interval);  //40
+
+for(i=1;i <= totalframes;i++) {
+	(function() {
+		var frame=i;
+		var b = cssColor2rgb(begin);
+		var e  = cssColor2rgb(end);
+		var change0=e[0]-b[0];
+		var change1=e[1]-b[1];
+		var change2=e[2]-b[2];
+
+		var change3=b[0]-e[0];
+		var change4=b[1]-e[1];
+		var change5=b[2]-e[2];
+
+		function color() {
+			if (!isNewColor) {
+				var increase0=ease(frame, b[0], change0, totalframes/2);
+				var increase1=ease(frame, b[1], change1, totalframes/2);
+				var increase2=ease(frame, b[2], change2, totalframes/2);
+				newColor = ('#'+d2h(parseInt(increase0))+d2h(parseInt(increase1))+d2h(parseInt(increase2)));
+				if (newColor === end) isNewColor=true;
+			} 
+
+			if (isNewColor) {
+				var increase3=ease(frame-totalframes/2, e[0], change3, totalframes/2);
+				var increase4=ease(frame-totalframes/2, e[1], change4, totalframes/2);
+				var increase5=ease(frame-totalframes/2, e[2], change5, totalframes/2);
+				newColor = ('#'+d2h(parseInt(increase3))+d2h(parseInt(increase4))+d2h(parseInt(increase5)));
+				if (newColor === begin) isNewColor=false;
+			}
+
+			ctxBoss.fillStyle = newColor;     
+		}
+		timer = setTimeout(color,interval*frame);
+	})(); 
+}
+
+animateTimer=setTimeout(function() {animateColor(ctxBoss.fillstyle,begin,end,duration,fps);},1000);
+}
+function ease(frame,begin,change,totalframes) {
+	return begin+change*(frame/totalframes);
+
+}
+
 
 //update score 
-
 function checkScore(){
 	if (scoreCheck){
 
-	if ((shooter1.drawX>=gameWidth/2-(0.5)*boss1.width) && (shooter1.drawX<=gameWidth/2+(0.5)*boss1.width)){
-		if (shooter1.drawY<=gameHeight/4) score = score + 15; 
-		 else if (shooter1.drawY<=gameHeight/2) score = score +5;
-		 else score ++;
+		if ((shooter1.drawX>=gameWidth/2-(0.5)*boss1.width) && (shooter1.drawX<=gameWidth/2+(0.5)*boss1.width)){
+			if (shooter1.drawY<=gameHeight/4) score = score + 15; 
+			else if (shooter1.drawY<=gameHeight/2) score = score +5;
+			else score ++;
+		}
 	}
-}
 }
 
 
 //hud
-function Hud() {
-
-}
+function Hud() {}
 Hud.prototype.draw = function() {
 	clearCtxHud();
 	ctxHud.fillStyle = 'white';
@@ -185,7 +269,7 @@ function clearCtxHud() {
 	ctxHud.clearRect(0,0,gameWidth,gameHeight);
 }
 
-//harninghud
+//warning hud
 function WarningHud() {
 
 }
@@ -199,20 +283,15 @@ function clearCtxWarningHud() {
 	ctxWarningHud.clearRect(0,0,gameWidth,gameHeight);
 }
 
-
 //shooter
 function Shooter() {
-	this.drawX = 190;
+	this.radius = 2;
+	this.drawX = gameWidth/2;
 	this.drawY = 480;
-	this.width = 20;
-	this.height = 20;
 	this.speed = 3;
 	this.isLeftKey = false;
 	this.isRightKey = false;
-	this.radius = 2;
-
 }
-
 
 
 Shooter.prototype.draw = function() {
@@ -246,25 +325,22 @@ Shooter.prototype.checkKeys = function(){
 
 //radiation
 function Radiation() {
-
+	this.width = 246;
+	this.height = 62;
 }
-	var imageObj = new Image();
-	imageObj.src='radiation.png';
+var imageObj = new Image();
+imageObj.src='radiation.png';
 Radiation.prototype.draw = function() {
 	clearCtxRadiation();
-
-
-	ctxRadiation.drawImage(imageObj, shooter1.drawX-108, 0);
+	ctxRadiation.drawImage(imageObj, shooter1.drawX-.5*this.width+6, 0, this.width, this.height);
 }
 function clearCtxRadiation() {
 	ctxRadiation.clearRect(0,0,gameWidth,gameHeight);
 }
 
-
-
 //boss
 function Boss() {
-	this.drawX = 190;
+	this.drawX = gameWidth/2;
 	this.drawY = 0;
 	this.width = 100;
 	this.height = 50;
@@ -275,20 +351,12 @@ function Boss() {
 
 Boss.prototype.draw = function() {
 	clearCtxBoss();
-	ctxBoss.fillStyle=gradient;
-
-
 	ctxBoss.beginPath();
-    ctxBoss.moveTo(gameWidth/2-(0.5)*this.width,0);
-    ctxBoss.lineTo(gameWidth/2,this.height);
-    ctxBoss.lineTo(gameWidth/2+(0.5)*this.width,0);
-    ctxBoss.closePath();
-
-
-    ctxBoss.fill();
-
-
-
+	ctxBoss.moveTo(gameWidth/2-(0.5)*this.width,0);
+	ctxBoss.lineTo(gameWidth/2,this.height);
+	ctxBoss.lineTo(gameWidth/2+(0.5)*this.width,0);
+	ctxBoss.closePath();
+	ctxBoss.fill();
 }
 
 function clearCtxBoss() {
@@ -296,7 +364,6 @@ function clearCtxBoss() {
 }
 
 //bullets
-
 angle=0;
 var angleDirection='left';
 function Bullets() {
@@ -305,56 +372,75 @@ function Bullets() {
 	this.speed = 2;
 	this.angle = angle;
 	this.bulletRadius=2;
-   this.radians = this.angle * Math.PI / 180;
+	this.radians = this.angle * Math.PI / 180;
 
 }
 
 Bullets.prototype.draw = function() {
-		if (angle>60){
-			angleDirection = 'right';
-		}
-		if (angle<-60) angleDirection = 'left';
+	if (angle>60){
+		angleDirection = 'right';
+	}
+	if (angle<-60) angleDirection = 'left';
 
-		if (angleDirection==='left') angle=angle+0.1;
-		if (angleDirection==='right') angle=angle-0.1;
-		
- 		this.drawY = this.drawY + Math.cos(this.radians) * this.speed;
-		this.drawX = this.drawX + Math.sin(this.radians) * this.speed;
+	if (angleDirection==='left') angle=angle+0.1;
+	if (angleDirection==='right') angle=angle-0.1;
 
-		ctxBullets.fillStyle='#fff';
-		ctxBullets.beginPath();
-		ctxBullets.arc(this.drawX, this.drawY, this.bulletRadius, 0, 2 * Math.PI, false);
-		if (phase === 2) { this.bulletRadius = this.bulletRadius + 0.4; ctxBullets.fillStyle='#f11';}
-	    ctxBullets.fill();
-	    this.checkEscaped();
+	this.drawY = this.drawY + Math.cos(this.radians) * this.speed;
+	this.drawX = this.drawX + Math.sin(this.radians) * this.speed;
 
-	   //check collisiond
-//
-	   	if (this.drawX <= shooter1.drawX + this.bulletRadius + 2 &&
-	   		this.drawX >= shooter1.drawX - this.bulletRadius - 2 &&
-	   		this.drawY <= shooter1.drawY + this.bulletRadius + 2 &&
-	   		this.drawY >= shooter1.drawY - this.bulletRadius - 2 || 
-			(
+	ctxBullets.fillStyle='#fff';
+	ctxBullets.beginPath();
+	ctxBullets.arc(this.drawX, this.drawY, this.bulletRadius, 0, 2 * Math.PI, false);
 
-	   		((shooter1.drawX>=gameWidth/2-(0.5)*boss1.width) && 
-	   		(shooter1.drawX<=gameWidth/2+(0.5)*boss1.width)) &&
-	   		(shooter1.drawY>=0) && 
-	   		(shooter1.drawY<=boss1.height) 
+	if (phase === 2) { 
+		this.bulletRadius = this.bulletRadius + 0.4; 
+		ctxBullets.fillStyle='#f11';
+	}
+	ctxBullets.fill();
+	this.checkEscaped();
 
-	   		)
-	   		)
-	   	{
-	   		stopSpawningBullets();
-	   		stopPhaseInterval();
-	   		scoreCheck=false;
-	   		warningHudText='GAME OVER! Score: ' + score;
-	   		setTimeout(function() {startSpawningBullets()}, 10000);
+//check for collision
+if (this.drawX <= shooter1.drawX + this.bulletRadius + 2 &&
+	this.drawX >= shooter1.drawX - this.bulletRadius - 2 &&
+	this.drawY <= shooter1.drawY + this.bulletRadius + 2 &&
+	this.drawY >= shooter1.drawY - this.bulletRadius - 2 || 
+	(
 
-	   	} 
-	    
+		((shooter1.drawX>=gameWidth/2-(0.5)*boss1.width) && 
+		(shooter1.drawX<=gameWidth/2+(0.5)*boss1.width)) &&
+		(shooter1.drawY>=0) && 
+		(shooter1.drawY<=boss1.height) 
+
+		)
+	)
+{
+	gameOver();
+
+} 
+
 }
 
-Bullets.prototype.checkEscaped = function () {
+//game over function
+
+function gameOver() {
+	if(!gameIsOver){
+	gameIsOver=true;
+	stopSpawningBullets();
+	stopPhaseInterval();
+	stopPhaseOneHudTimeout();
+	stopPhaseOneActionTimeout();
+	clearTimeout(animateTimer); 
+	scoreCheck=false;
+	warningHudText='GAME OVER! Score: ' + score;
+	setTimeout(function() {
+		startSpawningBullets();
+		pulseInit();
+		gameIsOver=false;
+	}, 10000);
+	}
+}
+
+Bullets.prototype.checkEscaped = function() {
 	if (this.drawY - gameHeight >= 200 ) {
 		this.destroyBullet();
 	}
@@ -372,40 +458,40 @@ function clearCtxBullets() {
 //key hooks
 function checkKeyDown(e) {
 	var keyID = e.keyCode || e.which;
-	if (keyID === 38 || keyID === 87) { //up || w
-		shooter1.isUpKey = true;
-		e.preventDefault();
-	}
-	if (keyID === 39|| keyID === 68) { //right || d
-		shooter1.isRightKey = true;
-		e.preventDefault();
-	}
-	if (keyID === 40 || keyID === 83) { //down || s
-		shooter1.isDownKey = true;
-		e.preventDefault();
-	}
-	if (keyID === 37 || keyID === 65) { //left || a
-		shooter1.isLeftKey = true;
-		e.preventDefault();
-	}
+if (keyID === 38 || keyID === 87) { //up || w
+	shooter1.isUpKey = true;
+	e.preventDefault();
+}
+if (keyID === 39|| keyID === 68) { //right || d
+	shooter1.isRightKey = true;
+	e.preventDefault();
+}
+if (keyID === 40 || keyID === 83) { //down || s
+	shooter1.isDownKey = true;
+	e.preventDefault();
+}
+if (keyID === 37 || keyID === 65) { //left || a
+	shooter1.isLeftKey = true;
+	e.preventDefault();
+}
 }
 
 function checkKeyUp(e) {
 	var keyID = e.keyCode || e.which;
-	if (keyID === 38 || keyID === 87) { //up || w
-		shooter1.isUpKey = false;
-		e.preventDefault();
-	}
-	if (keyID === 39 || keyID === 68) { //right || d
-		shooter1.isRightKey = false;
-		e.preventDefault();
-	}
-	if (keyID === 40 || keyID === 83) { //down || s
-		shooter1.isDownKey = false;
-		e.preventDefault();
-	}
-	if (keyID === 37 || keyID === 65) { //left || a
-		shooter1.isLeftKey = false;
-		e.preventDefault();
-	}
+if (keyID === 38 || keyID === 87) { //up || w
+	shooter1.isUpKey = false;
+	e.preventDefault();
+}
+if (keyID === 39 || keyID === 68) { //right || d
+	shooter1.isRightKey = false;
+	e.preventDefault();
+}
+if (keyID === 40 || keyID === 83) { //down || s
+	shooter1.isDownKey = false;
+	e.preventDefault();
+}
+if (keyID === 37 || keyID === 65) { //left || a
+	shooter1.isLeftKey = false;
+	e.preventDefault();
+}
 }
