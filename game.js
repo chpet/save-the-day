@@ -255,8 +255,9 @@ function checkScore(){
 	if (scoreCheck){
 
 		if ((shooter1.drawX>=gameWidth/2-(0.5)*boss1.width) && (shooter1.drawX<=gameWidth/2+(0.5)*boss1.width)){
-			if (shooter1.drawY<=gameHeight/4) { score = score + 15; multiplier='x15' } 
-			else if (shooter1.drawY<=gameHeight/2) { score = score + 5;  multiplier='x2' }
+			if (shooter1.drawY<=gameHeight/2*.4) { score = score + 15; multiplier='x8' } 
+			else if	(shooter1.drawY<=gameHeight/2*.6) { score = score + 15; multiplier='x4' } 
+			else if (shooter1.drawY<=gameHeight/2) { score = score + 2;  multiplier='x2' }
 			else { score ++; multiplier='x1'};
 		}
 	}
@@ -396,10 +397,10 @@ function Bullets() {
 }
 
 Bullets.prototype.draw = function() {
-	if (angle>60){
+	if (angle>80){
 		angleDirection = 'right';
 	}
-	if (angle<-60) angleDirection = 'left';
+	if (angle<-80) angleDirection = 'left';
 
 	if (angleDirection==='left') angle=angle+0.1;
 	if (angleDirection==='right') angle=angle-0.1;
@@ -425,10 +426,10 @@ if (this.drawX <= shooter1.drawX + this.bulletRadius + 2 &&
 	this.drawY >= shooter1.drawY - this.bulletRadius - 2 || 
 	(
 
-		((shooter1.drawX>=gameWidth/2-(0.5)*boss1.width) && 
-		(shooter1.drawX<=gameWidth/2+(0.5)*boss1.width)) &&
+		((shooter1.drawX>=gameWidth/2-shooter1.radius/2-(0.5)*boss1.width) && 
+		(shooter1.drawX<=gameWidth/2+shooter1.radius/2+(0.5)*boss1.width)) &&
 		(shooter1.drawY>=0) && 
-		(shooter1.drawY<=boss1.height) 
+		(shooter1.drawY<=boss1.height+shooter1.radius/2) 
 
 		)
 	)
