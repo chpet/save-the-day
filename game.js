@@ -269,7 +269,7 @@ function Hud() {}
 Hud.prototype.draw = function() {
 	clearCtxHud();
 	ctxHud.fillStyle = 'white';
-	ctxHud.font = '12px Arial'
+	ctxHud.font = '12px Gruppo'
 	ctxHud.fillText(score, 10, 25);
 }
 function clearCtxHud() {
@@ -284,7 +284,7 @@ WarningHud.prototype.draw = function() {
 	clearCtxWarningHud();
 	ctxWarningHud.fillText(warningHudText, gameWidth/2 - 120, 120);
 	ctxWarningHud.fillStyle = 'red';
-	ctxWarningHud.font = 'bold 22px Arial';
+	ctxWarningHud.font = '22px Gruppo';
 }
 function clearCtxWarningHud() {
 	ctxWarningHud.clearRect(0,0,gameWidth,gameHeight);
@@ -297,7 +297,7 @@ Multiplier.prototype.draw = function() {
 	clearCtxMultiplier();
 	ctxMultiplier.fillText(multiplier, 13, 40);
 	ctxMultiplier.fillStyle = 'red';
-	ctxMultiplier.font = 'bold 12px Arial';
+	ctxMultiplier.font = '12px Gruppo';
 }
 function clearCtxMultiplier() {
 	ctxMultiplier.clearRect(0,0,gameWidth,gameHeight);
