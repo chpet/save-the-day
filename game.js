@@ -64,7 +64,10 @@ var requestAnimFrame =  window.requestAnimationFrame ||
 window.webkitRequestAnimationFrame ||
 window.mozRequestAnimationFrame ||
 window.msRequestAnimationFrame ||
-window.oRequestAnimationFrame;		
+window.oRequestAnimationFrame ||
+function(callback) {
+	window.setTimeout(callback, 1000 / 60);
+}	
 
 //init 
 function init() {
@@ -259,7 +262,7 @@ function checkScore(){
 			else if	(shooter1.drawY<=gameHeight/2*.6) { score = score + 15; multiplier='x4' } 
 			else if (shooter1.drawY<=gameHeight/2) { score = score + 2;  multiplier='x2' }
 			else { score ++; multiplier='x1'};
-		}
+		} else { multiplier='x0'}
 	}
 }
 
